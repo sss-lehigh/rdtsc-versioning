@@ -287,7 +287,7 @@ int lazylist<K, V, RecManager>::rangeQuery(const int tid, const K &lo,
                                            const K &hi, K *const resultKeys,
                                            V *const resultValues) {
   recordmgr->leaveQuiescentState(tid, true);
-  int ts = rqProvider->traversal_start(tid);
+  timestamp_t ts = rqProvider->traversal_start(tid);
   int cnt = 0;
   nodeptr prev;
   nodeptr curr = rqProvider->read_vcas(tid, head->next, ts);

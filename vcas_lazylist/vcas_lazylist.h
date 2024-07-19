@@ -105,7 +105,7 @@ class lazylist {
 
   //+ Integrate timestamp for vCAS
   inline int getKeys(const int tid, node_t<K, V> *node, K *const outputKeys,
-                     V *const outputValues, int ts) {
+                     V *const outputValues, timestamp_t ts) {
     // ignore marked
     outputKeys[0] = node->key;
     outputValues[0] = node->val;

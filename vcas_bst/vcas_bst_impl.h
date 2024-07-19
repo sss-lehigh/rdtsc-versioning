@@ -71,7 +71,7 @@ template<class K, class V, class Compare, class RecManager>
 int vcas_bst_ns::vcas_bst<K,V,Compare,RecManager>::rangeQuery(const int tid, const K& lo, const K& hi, K * const resultKeys, V * const resultValues) {
     block<Node<K,V> > stack (NULL);
     recmgr->leaveQuiescentState(tid, true);
-    long long ts = rqProvider->traversal_start(tid);
+    timestamp_t ts = rqProvider->traversal_start(tid);
     // volatile long long sum = 0;
     // for(int i = 0; i < 500000; i++)
     //     sum += i;

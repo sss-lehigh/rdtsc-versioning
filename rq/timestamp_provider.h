@@ -25,7 +25,7 @@ class TimestampProvider {
 class RdtscTimestamp: public TimestampProvider {
     private:
         inline timestamp_t readRdtsc() {
-            unsigned long long cycles_low, cycles_high;
+            timestamp_t cycles_low, cycles_high;
             asm volatile (
                 "CPUID\n\t" // waits for previous code to finish executing 
                 "RDTSC\n\t" // reads timestamp and stores in registers rdx and rax
@@ -48,7 +48,7 @@ class RdtscTimestamp: public TimestampProvider {
 class RdtscpTimestamp: public TimestampProvider {
     private:
         inline timestamp_t readRdtscp() {
-            unsigned long long cycles_low, cycles_high;
+            timestamp_t cycles_low, cycles_high;
             asm volatile (
                 "RDTSCP\n\t"
                 "mov %%rdx, %0\n\t"
@@ -153,7 +153,7 @@ class BundlingTimestamp: public TimestampProvider {
 // lock-based implementation of ebr timestamp
 class EbrTimestamp: public TimestampProvider {
     private:
-        volatile long long timestamp;
+        volatile timestamp_t timestamp;
 
     public:
         EbrTimestamp() {

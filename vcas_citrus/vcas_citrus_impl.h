@@ -421,7 +421,7 @@ int citrustree<K, V, RecManager>::rangeQuery(const int tid, const K& lo,
                                              V* const resultValues) {
   block<node_t<K, V> > stack(NULL);
   recordmgr->leaveQuiescentState(tid, true);
-  long long ts = rqProvider->traversal_start(tid);
+  timestamp_t ts = rqProvider->traversal_start(tid);
 
   // depth first traversal (of interesting subtrees)
   int size = 0;

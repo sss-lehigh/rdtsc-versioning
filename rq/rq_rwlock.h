@@ -43,7 +43,7 @@ private:
         {
             struct
             { // anonymous struct inside anonymous union means we don't need to type anything special to access these variables
-                long long rq_lin_time;
+                timestamp_t rq_lin_time;
                 HashList<K> *hashlist;
                 volatile char padding0[PREFETCH_SIZE_BYTES];
                 void *announcements[MAX_NODES_INSERTED_OR_DELETED_ATOMICALLY + 1];
@@ -98,7 +98,7 @@ public:
         DEBUG_DEINIT_RQPROVIDER(NUM_PROCESSES);
     }
 
-    long long debug_getTimestamp()
+    timestamp_t debug_getTimestamp()
     {
         return ts_provider.Read();
     }
@@ -211,7 +211,7 @@ public:
 private:
     inline void set_insertion_timestamps(
         const int tid,
-        const long long ts,
+        const timestamp_t ts,
         NodeType *const *const insertedNodes,
         NodeType *const *const deletedNodes)
     {
@@ -226,7 +226,7 @@ private:
 
     inline void set_deletion_timestamps(
         const int tid,
-        const long long ts,
+        const timestamp_t ts,
         NodeType *const *const insertedNodes,
         NodeType *const *const deletedNodes)
     {
@@ -259,7 +259,7 @@ public:
         }
 
         rwlock.readLock();
-        long long ts = ts_provider.Read();
+        timestamp_t ts = ts_provider.Read();
         *lin_addr = lin_newval; // original linearization point
         rwlock.readUnlock();
 
@@ -297,7 +297,7 @@ public:
         }
 
         rwlock.readLock();
-        long long ts = ts_provider.Read();
+        timestamp_t ts = ts_provider.Read();
         T res = __sync_val_compare_and_swap(lin_addr, lin_oldval, lin_newval);
         rwlock.readUnlock();
 
@@ -366,7 +366,7 @@ private:
         // we return asap, and list facts that must be true if we didn't return
         assert(foundDuringTraversal || !logicalDeletion || ds->isLogicallyDeleted(tid, node));
 
-        long long itime = TIMESTAMP_NOT_SET;
+        timestamp_t itime = TIMESTAMP_NOT_SET;
         while (itime == TIMESTAMP_NOT_SET)
         {
             itime = node->itime;
@@ -382,7 +382,7 @@ private:
         // fact: node was inserted before the range query
 
         bool logicallyDeleted = (logicalDeletion && ds->isLogicallyDeleted(tid, node));
-        long long dtime = TIMESTAMP_NOT_SET;
+        timestamp_t dtime = TIMESTAMP_NOT_SET;
 
         if (!logicalDeletion && foundDuringTraversal)
             goto tryAddToRQ; // no logical deletion. since node was inserted before the range query, and the traversal encountered it, it must have been deleted AFTER the traversal encountered it.
@@ -558,7 +558,7 @@ public:
 #endif
 
         SOFTWARE_BARRIER;
-        long long end_timestamp = ts_provider.Read();
+        timestamp_t end_timestamp = ts_provider.Read();
         SOFTWARE_BARRIER;
 
         int numVisitedInAnnouncements = 0;
@@ -628,7 +628,7 @@ public:
 
                 ++numVisitedInEpochBags;
 
-                long long dtime = node->dtime;
+                timestamp_t dtime = node->dtime;
                 if (dtime != TIMESTAMP_NOT_SET && dtime > end_timestamp)
                 {
 

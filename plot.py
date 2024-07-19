@@ -71,9 +71,9 @@ flags.DEFINE_bool(
     "Automatically pull number of trials information from runscript.sh",
 )
 
-flags.DEFINE_integer(
-    "workloads_rqrate",
-    10,
+flags.DEFINE_list(
+    "workloads_rqrates",
+    [0, 10, 20],
     "Rate of range query operations to use when plotting the 'workloads' experiment",
 )
 flags.DEFINE_list(
@@ -584,6 +584,7 @@ def main(argv):
     if FLAGS.microbench:
         assert FLAGS.microbench_dir is not None
         FLAGS.workloads_urates = [int(u) for u in FLAGS.workloads_urates]
+        FLAGS.workloads_rqrates = [int(rq) for rq in FLAGS.workloads_rqrates]
 
         nthreads = get_threads_config()
         print("Thread configuration: " + str(nthreads))
@@ -607,19 +608,31 @@ def main(argv):
             for k in microbench_configs["ksizes"]:
                 if "run_workloads" in experiments:
                     for u in FLAGS.workloads_urates: # iterate through workloads
-                        plot_workload(
-                            FLAGS.microbench_dir,
-                            ds,
-                            k,
-                            u,
-                            (FLAGS.workloads_rqrate if u != 100 else 0),
-                            nthreads,
-                            ntrials,
-                            FLAGS.yaxis_titles,
-                            FLAGS.legends,
-                            FLAGS.save_plots,
-                            os.path.join(FLAGS.save_dir, "microbench"),
-                        )
+                        for rq in FLAGS.workloads_rqrates:
+
+                            if rq == 0 and u < 100:
+                                # Don't render charts for 0% range queries,
+                                # except when update rate is 100.
+                                continue
+
+                            if rq + u > 100:
+                                # A workload where more than 100% of ops are
+                                # spoken for is invalid
+                                continue
+
+                            plot_workload(
+                                FLAGS.microbench_dir,
+                                ds,
+                                k,
+                                u,
+                                rq,
+                                nthreads,
+                                ntrials,
+                                FLAGS.yaxis_titles,
+                                FLAGS.legends,
+                                FLAGS.save_plots,
+                                os.path.join(FLAGS.save_dir, "microbench"),
+                            )
 
                 if "run_rq_sizes" in experiments:
                     plot_rq_sizes(

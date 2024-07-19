@@ -42,7 +42,9 @@ namespace bst_ns {
         Node() {}
         Node(const Node& node) {}
 
-        friend ostream& operator<<(ostream& os, const Node<K,V>& obj) {}
+        friend ostream& operator<<(ostream& os, const Node<K,V>& obj) {
+            return os;
+        }
         void printTreeFile(ostream& os) {}
         void printTreeFileWeight(ostream& os, set< Node<K,V>* > *seen) {}
         void printTreeFileWeight(ostream& os) {}

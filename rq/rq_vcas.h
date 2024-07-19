@@ -24,7 +24,7 @@
 template <typename T>
 struct vcas_obj_t {
   T val;
-  int ts;
+  timestamp_t ts;
   vcas_obj_t<T>* nextv;
   vcas_obj_t(T val, vcas_obj_t<T>* nextv)
       : val(val), nextv(nextv), ts(-1) {}  // TBD=-1
@@ -41,7 +41,7 @@ class RQProvider {
     union {
       struct {  // anonymous struct inside anonymous union means we don't need
                 // to type anything special to access these variables
-        long long rq_lin_time;
+        timestamp_t rq_lin_time;
       };
       char bytes[__RQ_THREAD_DATA_SIZE];  // avoid false sharing
     };
@@ -68,7 +68,7 @@ class RQProvider {
   template <class T>
   inline void initTS(T node) {
     if (node->ts == TBD) {
-      long long curTS = ts_provider.Read();
+      timestamp_t curTS = ts_provider.Read();
       CAS(&(node->ts), TBD, curTS);
     }
   }
@@ -150,7 +150,7 @@ class RQProvider {
   // invocations of rq_read_addr
   template <typename T>
   inline T read_vcas(const int tid, vcas_obj_t<T> volatile* const vcas_obj,
-                     const int ts) {
+                     const timestamp_t ts) {
     vcas_obj_t<T> volatile* head = vcas_obj;
     initTS(head);
     while (head != nullptr && head->ts > ts) {
@@ -236,7 +236,7 @@ class RQProvider {
   template <typename T>
   inline bool cas_vcas(const int tid, vcas_obj_t<T>* volatile* const lin_vcas_obj,
                     const T& lin_oldval, const T& lin_newval) {
-    long long ts = 1;
+    timestamp_t ts = 1;
     bool res;
     vcas_obj_t<T>* head = *(lin_vcas_obj);
     initTS(head);
@@ -271,7 +271,7 @@ class RQProvider {
       announce_physical_deletion(tid, deletedNodes);
     }
 
-    long long ts = 1;
+    timestamp_t ts = 1;
     bool res;
     vcas_obj_t<T>* head = *(lin_vcas_obj);
     initTS(head);
@@ -302,11 +302,11 @@ class RQProvider {
       }
     }
 
-    return NULL;
+    return static_cast<T>(NULL);
   }
 
   // invoke at the start of each traversal
-  inline int traversal_start(const int tid) {
+  inline timestamp_t traversal_start(const int tid) {
     return ts_provider.Advance();
   }
 
@@ -316,7 +316,7 @@ class RQProvider {
   inline void traversal_try_add(const int tid, NodeType* const node,
                                 K* const rqResultKeys, V* const rqResultValues,
                                 int* const startIndex, const K& lo, const K& hi,
-                                const int ts) {
+                                const timestamp_t ts) {
     int start = (*startIndex);
     int keysInNode = ds->getKeys(tid, node, rqResultKeys + start,
                                  rqResultValues + start, ts);
@@ -368,7 +368,7 @@ class RQProvider {
   // or rq_linearize_update_at_cas, you must replace any reads of addr with
   // invocations of rq_read_addr
   template <typename T>
-  inline T read_addr(const int tid, T volatile* const addr, const int ts) {
+  inline T read_addr(const int tid, T volatile* const addr, const timestamp_t ts) {
     T head = *addr;
     // if(head != NULL)
     //     std::cout << "ts: " << ts << ", node ts: " << head->ts << endl;
@@ -462,7 +462,7 @@ class RQProvider {
       announce_physical_deletion(tid, deletedNodes);
     }
 
-    long long ts = 1;
+    timestamp_t ts = 1;
     bool res;
     T head = *lin_addr;
     if (head != NULL) initTS(head);
@@ -496,7 +496,7 @@ class RQProvider {
   }
 
   // invoke at the start of each traversal
-  inline int traversal_start(const int tid) {
+  inline timestamp_t traversal_start(const int tid) {
     return ts_provider.Advance();
   }
 
@@ -506,7 +506,7 @@ class RQProvider {
   inline void traversal_try_add(const int tid, NodeType* const node,
                                 K* const rqResultKeys, V* const rqResultValues,
                                 int* const startIndex, const K& lo, const K& hi,
-                                const int ts) {
+                                const timestamp_t ts) {
     int start = (*startIndex);
     int keysInNode = ds->getKeys(tid, node, rqResultKeys + start,
                                  rqResultValues + start, ts);

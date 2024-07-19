@@ -33,13 +33,15 @@ namespace vcas_bst_ns {
         nodeptr right;
         RECLAIM_RCU_RCUHEAD_DEFN;
 
-        volatile long long ts;
+        volatile timestamp_t ts;
         nodeptr nextv;
 
         Node() {}
         Node(const Node& node) {}
 
-        friend ostream& operator<<(ostream& os, const Node<K,V>& obj) {}
+        friend ostream& operator<<(ostream& os, const Node<K,V>& obj) {
+            return os;
+        }
         void printTreeFile(ostream& os) {}
         void printTreeFileWeight(ostream& os, set< Node<K,V>* > *seen) {}
         void printTreeFileWeight(ostream& os) {}

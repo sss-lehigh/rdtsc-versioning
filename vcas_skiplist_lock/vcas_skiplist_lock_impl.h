@@ -481,7 +481,7 @@ int skiplist<K, V, RecManager>::rangeQuery(const int tid, const K& lo,
                                            V* const resultValues) {
   //    cout<<"rangeQuery(lo="<<lo<<" hi="<<hi<<")"<<endl;
   recmgr->leaveQuiescentState(tid, true);
-  int ts = rqProvider->traversal_start(tid);
+  timestamp_t ts = rqProvider->traversal_start(tid);
   int cnt = 0;
   // use the find function to find the low key
   //    int nodesSkipped = 0;

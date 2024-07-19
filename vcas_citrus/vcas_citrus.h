@@ -119,7 +119,7 @@ class citrustree {
   inline bool isLogicallyInserted(const int tid, nodeptr node) { return true; }
 
   inline int getKeys(const int tid, node_t<K, V>* node, K* const outputKeys,
-                     V* const outputValues, long long ts) {
+                     V* const outputValues, timestamp_t ts) {
     if (node->key >= NO_KEY) return 0;
     outputKeys[0] = node->key;
     outputValues[0] = node->value;

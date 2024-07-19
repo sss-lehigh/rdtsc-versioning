@@ -149,7 +149,7 @@ class skiplist {
   RecManager* const debugGetRecMgr() { return recmgr; }
 
   inline int getKeys(const int tid, node_t<K, V>* node, K* const outputKeys,
-                     V* const outputValues, const int ts) {
+                     V* const outputValues, const timestamp_t ts) {
     outputKeys[0] = node->key;
     outputValues[0] = node->val;
     return 1;

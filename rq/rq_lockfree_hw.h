@@ -90,10 +90,10 @@ private:
         {
             struct
             { // anonymous struct inside anonymous union means we don't need to type anything special to access these variables
-                long long rq_lin_time;
+                timestamp_t rq_lin_time;
                 HashList<K> *hashlist;
 #ifdef COUNT_CODE_PATH_EXECUTIONS
-                long long codePathExecutions[CODE_COVERAGE_MAX_PATHS];
+                timestamp_t codePathExecutions[CODE_COVERAGE_MAX_PATHS];
 #endif
                 volatile char padding0[PREFETCH_SIZE_BYTES];
                 void *announcements[MAX_NODES_INSERTED_OR_DELETED_ATOMICALLY];
@@ -119,7 +119,7 @@ private:
 
     const int NUM_PROCESSES;
     volatile char padding0[PREFETCH_SIZE_BYTES];
-    volatile long long timestamp = 1;
+    volatile timestamp_t timestamp = 1;
     volatile char padding1[PREFETCH_SIZE_BYTES];
     __rq_thread_data *threadData;
 
@@ -179,7 +179,7 @@ public:
         DEBUG_DEINIT_RQPROVIDER(NUM_PROCESSES);
     }
 
-    long long debug_getTimestamp()
+    timestamp_t debug_getTimestamp()
     {
         return timestamp;
     }
@@ -313,7 +313,7 @@ public:
 private:
     inline void set_insertion_timestamps(
         const int tid,
-        const long long ts,
+        const timestamp_t ts,
         NodeType *const *const insertedNodes,
         NodeType *const *const deletedNodes)
     {
@@ -328,7 +328,7 @@ private:
 
     inline void set_deletion_timestamps(
         const int tid,
-        const long long ts,
+        const timestamp_t ts,
         NodeType *const *const insertedNodes,
         NodeType *const *const deletedNodes)
     {
@@ -487,8 +487,8 @@ public:
         bool res = false;
     
         while (true) {
-            long long curr_ts = timestamp;
-            long long ts = ts_provider.Advance(); // just returns what is read from rdtsc/p
+            timestamp_t curr_ts = timestamp;
+            timestamp_t ts = ts_provider.Advance(); // just returns what is read from rdtsc/p
             
             if (curr_ts == timestamp) {
                 res = __sync_bool_compare_and_swap(&timestamp, curr_ts, ts);
@@ -516,7 +516,7 @@ private:
             return 0; // node inserted after the range query
         // fact: node has been logically inserted
 
-        long long itime = node->itime;
+        timestamp_t itime = node->itime;
         if (itime != TIMESTAMP_NOT_SET & node->itime >= threadData[tid].rq_lin_time)
             return 0; // node inserted after the range query
         // fact: either itime was not set above, or node was inserted before rq
@@ -586,7 +586,7 @@ private:
 
         /////////////// HANDLE LOGICAL DELETION AND CHECK DTIME ////////////////
 
-        long long dtime = TIMESTAMP_NOT_SET;
+        timestamp_t dtime = TIMESTAMP_NOT_SET;
 
         if (!logicalDeletion && foundDuringTraversal)
             goto tryAddToRQ; // no logical deletion. since node was inserted before the range query, and the traversal encountered it, it must have been deleted AFTER the traversal encountered it.
@@ -775,7 +775,7 @@ public:
         // todo: possibly optimize by skipping entire blocks if there are many keys to skip (does not seem to be justifiable for 4 work threads and 4 range query threads)
 
         SOFTWARE_BARRIER;
-        long long end_timestamp = timestamp;
+        timestamp_t end_timestamp = timestamp;
         SOFTWARE_BARRIER;
 
         int numVisitedInAnnouncements = 0;
@@ -820,7 +820,7 @@ public:
                 
                 ++numVisitedInEpochBags;
                 
-                long long dtime = node->dtime;
+                timestamp_t dtime = node->dtime;
                 if (dtime != TIMESTAMP_NOT_SET && dtime > end_timestamp) continue;
                 
                 if (!(logicalDeletion && canRetireNodesLogicallyDeletedByOtherProcesses)) {
@@ -884,7 +884,7 @@ public:
 
                 ++numVisitedInEpochBags;
 
-                long long dtime = node->dtime;
+                timestamp_t dtime = node->dtime;
                 if (dtime != TIMESTAMP_NOT_SET && dtime > end_timestamp)
                 {
                     ++numSkippedInEpochBags;

@@ -285,7 +285,7 @@ public:
             return true;
         }
 
-        inline int getKeys(const int tid, Node<K,V> * node, K * const outputKeys, V * const outputValues, const long long ts) {
+        inline int getKeys(const int tid, Node<K,V> * node, K * const outputKeys, V * const outputValues, const timestamp_t ts) {
             if (rqProvider->read_addr(tid, &node->left, ts) == NULL && node->key != NO_KEY) {
                 // leaf ==> its key is in the set.
                 outputKeys[0] = node->key;
